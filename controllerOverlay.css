@@ -1,84 +1,84 @@
-import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import "./controllerOverlay.css";
 
-const XboxControllerOverlay = () => {
-  const [controllerData, setControllerData] = useState(null);
+.controller-body.gamepad-viewer {
+  position: relative;
+  width: 400px;
+  height: 250px;
+  background: #121212;
+  border-radius: 20px;
+  box-shadow: 0 0 15px #00aaff88;
+  margin: 20px auto;
+  padding: 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  user-select: none;
+}
 
-  useEffect(() => {
-    const handleGamepad = () => {
-      const gamepads = navigator.getGamepads();
-      if (gamepads[0]) {
-        const { buttons, axes } = gamepads[0];
-        setControllerData({ buttons, axes });
-      }
-    };
+.controller-branding {
+  color: #00aaff;
+  font-weight: 700;
+  font-size: 1.8rem;
+  text-align: center;
+  margin-bottom: 15px;
+  letter-spacing: 2px;
+}
 
-    window.addEventListener("gamepadconnected", handleGamepad);
-    window.addEventListener("gamepaddisconnected", () =>
-      setControllerData(null)
-    );
-    const interval = setInterval(handleGamepad, 100);
+.button {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #444;
+  box-shadow: inset 0 0 8px #00000099;
+  transition: background 0.2s, box-shadow 0.2s;
+  border: 2px solid #222;
+}
 
-    return () => {
-      window.removeEventListener("gamepadconnected", handleGamepad);
-      window.removeEventListener("gamepaddisconnected", handleGamepad);
-      clearInterval(interval);
-    };
-  }, []);
+.button.pressed {
+  background: #00aaff;
+  box-shadow: 0 0 12px #00aaff, inset 0 0 15px #00aaffcc;
+  border-color: #00ccff;
+}
 
-  const isPressed = (index) =>
-    controllerData && controllerData.buttons[index].pressed;
+.button.a { right: 30px; bottom: 60px; }
+.button.b { right: 10px; bottom: 90px; }
+.button.x { right: 50px; bottom: 90px; }
+.button.y { right: 30px; bottom: 120px; }
 
-  const joystickPosition = (xIndex, yIndex) => {
-    if (!controllerData) return { x: 0, y: 0 };
-    return {
-      x: controllerData.axes[xIndex] * 20,
-      y: controllerData.axes[yIndex] * 20,
-    };
-  };
+.button.lb { left: 60px; top: 20px; width: 50px; height: 20px; border-radius: 12px; }
+.button.rb { right: 60px; top: 20px; width: 50px; height: 20px; border-radius: 12px; }
+.button.lt { left: 30px; top: 10px; width: 40px; height: 15px; border-radius: 10px; }
+.button.rt { right: 30px; top: 10px; width: 40px; height: 15px; border-radius: 10px; }
 
-  const buttonMapping = [
-    { name: "a", style: { bottom: "60px", right: "30px" } },
-    { name: "b", style: { bottom: "90px", right: "10px" } },
-    { name: "x", style: { bottom: "90px", right: "50px" } },
-    { name: "y", style: { bottom: "120px", right: "30px" } },
-    { name: "lb", style: { top: "20px", left: "60px" } },
-    { name: "rb", style: { top: "20px", right: "60px" } },
-    { name: "lt", style: { top: "10px", left: "30px" } },
-    { name: "rt", style: { top: "10px", right: "30px" } },
-    { name: "back", style: { top: "60px", left: "150px" } },
-    { name: "start", style: { top: "60px", right: "150px" } },
-    { name: "ls", style: { bottom: "140px", left: "40px" } },
-    { name: "rs", style: { bottom: "40px", right: "80px" } }
-  ];
+.button.back { left: 150px; top: 60px; width: 30px; height: 15px; border-radius: 8px; }
+.button.start { right: 150px; top: 60px; width: 30px; height: 15px; border-radius: 8px; }
 
-  return (
-    <div className="controller-container">
-      <div className="controller-body gamepad-viewer">
-        <div className="controller-branding">XxYobrohoxX</div>
-        {buttonMapping.map(({ name, style }, index) => (
-          <motion.div
-            key={name}
-            className={`button ${name} ${isPressed(index) ? "pressed" : ""}`}
-            style={style}
-          />
-        ))}
+.button.ls { left: 40px; bottom: 140px; width: 40px; height: 40px; border-radius: 50%; }
+.button.rs { right: 80px; bottom: 40px; width: 40px; height: 40px; border-radius: 50%; }
 
-        <motion.div
-          className="joystick left-stick"
-          animate={joystickPosition(0, 1)}
-          style={{ left: "100px", top: "140px" }}
-        />
+.joystick {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  background: #222;
+  border-radius: 50%;
+  box-shadow: inset 0 0 10px #000000bb;
+  border: 3px solid #00aaff;
+}
 
-        <motion.div
-          className="joystick right-stick"
-          animate={joystickPosition(2, 3)}
-          style={{ right: "100px", top: "140px" }}
-        />
-      </div>
-    </div>
-  );
-};
+.joystick::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 15px;
+  height: 15px;
+  background: #00aaff;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 10px #00aaffcc;
+  transition: transform 0.1s;
+}
 
-export default XboxControllerOverlay;
+.joystick.left-stick::after,
+.joystick.right-stick::after {
+  transform-origin: center;
+}
