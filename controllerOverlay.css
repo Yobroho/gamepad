@@ -1,0 +1,84 @@
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import "./controllerOverlay.css";
+
+const XboxControllerOverlay = () => {
+  const [controllerData, setControllerData] = useState(null);
+
+  useEffect(() => {
+    const handleGamepad = () => {
+      const gamepads = navigator.getGamepads();
+      if (gamepads[0]) {
+        const { buttons, axes } = gamepads[0];
+        setControllerData({ buttons, axes });
+      }
+    };
+
+    window.addEventListener("gamepadconnected", handleGamepad);
+    window.addEventListener("gamepaddisconnected", () =>
+      setControllerData(null)
+    );
+    const interval = setInterval(handleGamepad, 100);
+
+    return () => {
+      window.removeEventListener("gamepadconnected", handleGamepad);
+      window.removeEventListener("gamepaddisconnected", handleGamepad);
+      clearInterval(interval);
+    };
+  }, []);
+
+  const isPressed = (index) =>
+    controllerData && controllerData.buttons[index].pressed;
+
+  const joystickPosition = (xIndex, yIndex) => {
+    if (!controllerData) return { x: 0, y: 0 };
+    return {
+      x: controllerData.axes[xIndex] * 20,
+      y: controllerData.axes[yIndex] * 20,
+    };
+  };
+
+  const buttonMapping = [
+    { name: "a", style: { bottom: "60px", right: "30px" } },
+    { name: "b", style: { bottom: "90px", right: "10px" } },
+    { name: "x", style: { bottom: "90px", right: "50px" } },
+    { name: "y", style: { bottom: "120px", right: "30px" } },
+    { name: "lb", style: { top: "20px", left: "60px" } },
+    { name: "rb", style: { top: "20px", right: "60px" } },
+    { name: "lt", style: { top: "10px", left: "30px" } },
+    { name: "rt", style: { top: "10px", right: "30px" } },
+    { name: "back", style: { top: "60px", left: "150px" } },
+    { name: "start", style: { top: "60px", right: "150px" } },
+    { name: "ls", style: { bottom: "140px", left: "40px" } },
+    { name: "rs", style: { bottom: "40px", right: "80px" } }
+  ];
+
+  return (
+    <div className="controller-container">
+      <div className="controller-body gamepad-viewer">
+        <div className="controller-branding">XxYobrohoxX</div>
+        {buttonMapping.map(({ name, style }, index) => (
+          <motion.div
+            key={name}
+            className={`button ${name} ${isPressed(index) ? "pressed" : ""}`}
+            style={style}
+          />
+        ))}
+
+        <motion.div
+          className="joystick left-stick"
+          animate={joystickPosition(0, 1)}
+          style={{ left: "100px", top: "140px" }}
+        />
+
+        <motion.div
+          className="joystick right-stick"
+          animate={joystickPosition(2, 3)}
+          style={{ right: "100px", top: "140px" }}
+        />
+      </div>
+    </div>
+  );
+};
+
+export default XboxControllerOverlay;
